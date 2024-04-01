@@ -1,5 +1,6 @@
-import cartSlice, { CartState } from "./cartSlice";
-import cartReducer, { addToCart, removeFromCart, updateQuantity } from "./cartSlice";
+import cartReducer, { CartState, addToCart, removeFromCart, updateQuantity, getNumItems } from "./cartSlice";
+import type { RootState } from "../../app/store";
+
 
 describe("cart reducer", () => {
     test("an empty action", () => {
@@ -58,4 +59,31 @@ describe("cart reducer", () => {
           items: { abc:1, def: 5 }, //final update from 3 to 5
         });
       });
+});
+
+describe("selectors", () => {
+    describe("getNumItems", () => {
+        it("should return 0 with no items", () => {
+            const cart: CartState = {
+                checkoutState: "READY",
+                errorMessage: "",
+                items: {}
+            };
+            // construct a root state here:
+            
+            const result = getNumItems({ cart } as RootState);
+            expect(result).toEqual(0);
+        });
+        it("should add up the total", () => {
+            const cart: CartState = {
+                checkoutState: "READY",
+                errorMessage: "",
+                items: { abc: 3, def: 3 }
+            };
+            // construct a another root state here:
+            
+            const result = getNumItems({ cart } as RootState);
+            expect(result).toEqual(6);
+        });
+    });
 });
