@@ -1,6 +1,7 @@
 import cartReducer, { 
     CartState, 
     addToCart, 
+    checkoutCart,
     removeFromCart, 
     updateQuantity, 
     getNumItems,
@@ -216,5 +217,48 @@ describe("selectors", () => {
             expect(getMemoizedNumItems.recomputations()).toEqual(2);
         });
 
+    });
+  });
+
+  describe("thunks", () => {
+    describe("checkoutCart w/mocked dispatch", () => {
+        it("should checkout", async () => {
+            const dispatch = jest.fn();
+            const state: RootState = {
+                products: { products: {}},
+                cart: { checkoutState: "READY", errorMessage: "", items: { abc: 123}},
+
+            };
+            const thunk = checkoutCart();
+            await thunk(dispatch, () => state, undefined);
+            console.log(dispatch.mock.calls)
+            const { calls} = dispatch.mock;
+            expect(calls).toHaveLength(2);
+            expect(calls[0][0].type).toEqual("cart/checkout/pending");
+            console.log(calls[0], calls[1])
+            expect(calls[0][0].type).toEqual("cart/checkout/fulfilled");
+            expect(calls[0][0].type).toEqual({ sucess: true});
+            expect(calls[1][0].payload).toEqual({ success: true});
+
+        });
+        it("should fail with no items", async () => {
+            const dispatch = jest.fn();
+            const state: RootState = {
+                products: { products: {}},
+                cart: { checkoutState: "READY", errorMessage: "", items: {}},
+
+            };
+            const thunk = checkoutCart();
+            await thunk(dispatch, () => state, undefined);
+            console.log(dispatch.mock.calls)
+            const { calls} = dispatch.mock;
+            expect(calls).toHaveLength(2);
+            expect(calls[0][0].type).toEqual("cart/checkout/pending");
+            console.log(calls[0], calls[1])
+            expect(calls[0][0].type).toEqual("cart/checkout/rejected");
+            expect(calls[0][0].type).toEqual({ sucess: true});
+            expect(calls[1][0].payload).toEqual(undefined);
+            expect(calls[1][0].error.message).toEqual('Must include cart items');
+        });
     });
   });
